@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { API_URL } from '@/config';
 
 interface User {
   username: string;
@@ -40,6 +41,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (user) {
       set({ currentUser: user });
+      
+      // If it's the admin user, set the admin token
+      if (user.username === defaultAdmin.username) {
+        // In a real app, this would be a JWT from the server
+        localStorage.setItem('adminToken', 'admin-token');
+        localStorage.setItem('adminTokenTimestamp', new Date().toISOString());
+      }
+      
       return true;
     }
     return false;
@@ -47,6 +56,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     set({ currentUser: null });
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminTokenTimestamp');
   },
 
   addUser: (user: User) => {
