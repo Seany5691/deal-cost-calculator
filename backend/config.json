@@ -4,38 +4,52 @@
       "id": "hardware",
       "items": [
         {
-          "cost": 3003,
-          "id": "switchboard",
+          "cost": 808.96,
+          "id": "yealink-t31p",
           "locked": true,
-          "name": "Switchboard",
+          "name": "Yealink T31P (B&W desk- excludes PSU)",
           "quantity": 0
         },
         {
-          "cost": 1201,
-          "id": "desktop-phone",
+          "cost": 1213.44,
+          "id": "yealink-t34w",
           "locked": true,
-          "name": "Desktop Phone",
+          "name": "Yealink T34W (Colour desk- includes PSU)",
           "quantity": 0
         },
         {
-          "cost": 1501,
-          "id": "cordless-phone",
+          "cost": 1693.76,
+          "id": "yealink-t43u",
           "locked": true,
-          "name": "Cordless Phone",
+          "name": "Yealink T43U Switchboard (B&W- excludes PSU)",
           "quantity": 0
         },
         {
-          "cost": 502,
-          "id": "mobile-apps",
+          "cost": 1693.76,
+          "id": "yealink-t44u",
           "locked": true,
-          "name": "Mobile Apps",
+          "name": "Yealink T44U Switchboard (Colour- excludes PSU)",
           "quantity": 0
         },
         {
-          "cost": 2,
-          "id": "a",
-          "locked": false,
-          "name": "a",
+          "cost": 1820.16,
+          "id": "yealink-w73p",
+          "locked": true,
+          "name": "Yealink W73P Cordless (Handset & base)",
+          "quantity": 0
+        },
+        {
+          "cost": 1137.60,
+          "id": "yealink-w73h",
+          "locked": true,
+          "name": "Yealink W73H (Handset only)",
+          "quantity": 0
+        },
+        {
+          "cost": 0,
+          "id": "mobile-app",
+          "locked": true,
+          "name": "Additional Mobile App",
           "quantity": 0
         }
       ],
