@@ -23,7 +23,7 @@ export function AdminLoginPage() {
       if (username.trim() !== 'Camryn') {
         toast({
           title: 'Error',
-          description: 'Invalid admin credentials',
+          description: 'Only admin can access this page',
           variant: 'destructive',
         });
         setIsLoading(false);
@@ -63,7 +63,7 @@ export function AdminLoginPage() {
         <CardHeader>
           <CardTitle>Admin Login</CardTitle>
           <CardDescription>
-            Enter your admin credentials
+            Enter admin credentials to access the admin console
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,10 +1,11 @@
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth';
+import { Link } from 'react-router-dom';
 
 export function UserLoginPage() {
   const [username, setUsername] = useState('');
@@ -12,13 +13,7 @@ export function UserLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login, isAuthenticated } = useAuthStore();
-
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/calculator');
-    }
-  }, [isAuthenticated, navigate]);
+  const { login } = useAuthStore();
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -56,7 +51,7 @@ export function UserLoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>Calculator Login</CardTitle>
           <CardDescription>
             Enter your credentials to access the calculator
           </CardDescription>
@@ -88,6 +83,11 @@ export function UserLoginPage() {
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
+            <div className="text-center mt-4">
+              <Link to="/admin/login" className="text-sm text-blue-600 hover:underline">
+                Admin Login
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>
