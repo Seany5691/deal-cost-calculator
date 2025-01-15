@@ -2,113 +2,76 @@ import { create } from 'zustand';
 
 interface User {
   username: string;
-  role: 'admin' | 'user';
+  password: string;
+  isAdmin: boolean;
 }
 
-interface AuthStore {
-  user: User | null;
-  token: string | null;
-  setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
+interface AuthState {
+  users: User[];
+  currentUser: User | null;
+  isAuthenticated: () => boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  isAuthenticated: () => boolean;
-  isAdmin: () => boolean;
+  addUser: (user: User) => void;
+  removeUser: (username: string) => void;
   initializeFromStorage: () => void;
 }
 
-// The only admin user
-const ADMIN_USER = {
+// Default admin user
+const defaultAdmin: User = {
   username: 'Camryn',
   password: 'Elliot',
-  role: 'admin' as const
+  isAdmin: true,
 };
 
-// Initialize localStorage with default users if not already set
-if (!localStorage.getItem('users')) {
-  localStorage.setItem('users', JSON.stringify({}));
-}
+export const useAuthStore = create<AuthState>((set, get) => ({
+  users: [defaultAdmin],
+  currentUser: null,
 
-const validateCredentials = (username: string, password: string): User | null => {
-  // Check if it's the admin user
-  if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
-    return {
-      username: ADMIN_USER.username,
-      role: ADMIN_USER.role
-    };
-  }
-
-  // Check other users
-  const users = JSON.parse(localStorage.getItem('users') || '{}');
-  const user = users[username];
-  
-  if (user && user.password === password && username !== 'Camryn') {
-    return {
-      username: user.username,
-      role: 'user' // All other users are regular users
-    };
-  }
-  
-  return null;
-};
-
-export const useAuthStore = create<AuthStore>((set, get) => ({
-  user: null,
-  token: null,
-
-  setUser: (user) => {
-    set({ user });
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
-    }
-  },
-
-  setToken: (token) => {
-    set({ token });
-    if (token) {
-      localStorage.setItem('userToken', token);
-    } else {
-      localStorage.removeItem('userToken');
-    }
+  isAuthenticated: () => {
+    return get().currentUser !== null;
   },
 
   login: async (username: string, password: string) => {
-    const user = validateCredentials(username, password);
-    
+    const users = get().users;
+    const user = users.find(
+      (u) => u.username === username && u.password === password
+    );
+
     if (user) {
-      const token = btoa(`${username}:${new Date().getTime()}`);
-      get().setUser(user);
-      get().setToken(token);
+      set({ currentUser: user });
       return true;
     }
-    
     return false;
   },
 
   logout: () => {
-    get().setUser(null);
-    get().setToken(null);
+    set({ currentUser: null });
   },
 
-  isAuthenticated: () => {
-    return !!get().user && !!get().token;
+  addUser: (user: User) => {
+    const users = get().users;
+    set({ users: [...users, user] });
+    localStorage.setItem('users', JSON.stringify([...users, user]));
   },
 
-  isAdmin: () => {
-    return get().user?.username === 'Camryn';
+  removeUser: (username: string) => {
+    const users = get().users.filter((u) => u.username !== username);
+    set({ users });
+    localStorage.setItem('users', JSON.stringify(users));
   },
 
   initializeFromStorage: () => {
-    const token = localStorage.getItem('userToken');
-    const user = localStorage.getItem('user');
-    
-    if (token && user) {
-      set({
-        token,
-        user: JSON.parse(user)
-      });
+    const storedUsers = localStorage.getItem('users');
+    if (storedUsers) {
+      const users = JSON.parse(storedUsers);
+      // Ensure admin user is always present
+      if (!users.some((u: User) => u.username === defaultAdmin.username)) {
+        users.push(defaultAdmin);
+      }
+      set({ users });
+    } else {
+      localStorage.setItem('users', JSON.stringify([defaultAdmin]));
     }
-  }
+  },
 }));

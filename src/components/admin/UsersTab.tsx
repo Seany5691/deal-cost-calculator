@@ -1,33 +1,26 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { FormEvent, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { Trash2 } from 'lucide-react';
+import { useAuthStore } from '@/store/auth';
 
 interface User {
   username: string;
   password: string;
-  role: 'admin' | 'user';
+  isAdmin: boolean;
 }
 
 export function UsersTab() {
-  const [users, setUsers] = useState<Record<string, User>>(() => {
-    const savedUsers = localStorage.getItem('users');
-    return savedUsers ? JSON.parse(savedUsers) : {
-      'admin': {
-        username: 'admin',
-        password: 'admin123',
-        role: 'admin'
-      }
-    };
-  });
-  
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const { toast } = useToast();
+  const { users, addUser, removeUser } = useAuthStore();
 
-  const addUser = () => {
+  const handleAddUser = (e: FormEvent) => {
+    e.preventDefault();
+
     if (!newUsername || !newPassword) {
       toast({
         title: 'Error',
@@ -37,101 +30,94 @@ export function UsersTab() {
       return;
     }
 
-    if (users[newUsername]) {
+    // Don't allow adding user with name 'Camryn'
+    if (newUsername.trim() === 'Camryn') {
       toast({
         title: 'Error',
-        description: 'User already exists',
+        description: 'This username is reserved',
         variant: 'destructive',
       });
       return;
     }
 
-    const updatedUsers = {
-      ...users,
-      [newUsername]: {
-        username: newUsername,
-        password: newPassword,
-        role: 'user'
-      }
+    const newUser: User = {
+      username: newUsername.trim(),
+      password: newPassword.trim(),
+      isAdmin: false,
     };
 
-    setUsers(updatedUsers);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    
+    addUser(newUser);
     setNewUsername('');
     setNewPassword('');
-    
+
     toast({
       title: 'Success',
       description: 'User added successfully',
     });
   };
 
-  const deleteUser = (username: string) => {
-    if (username === 'admin') {
+  const handleRemoveUser = (username: string) => {
+    if (username === 'Camryn') {
       toast({
         title: 'Error',
-        description: 'Cannot delete admin user',
+        description: 'Cannot remove admin user',
         variant: 'destructive',
       });
       return;
     }
 
-    const updatedUsers = { ...users };
-    delete updatedUsers[username];
-    
-    setUsers(updatedUsers);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    
+    removeUser(username);
     toast({
       title: 'Success',
-      description: 'User deleted successfully',
+      description: 'User removed successfully',
     });
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>User Management</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex gap-4">
-            <Input
-              placeholder="Username"
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            <Button onClick={addUser}>Add User</Button>
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="pt-6">
+          <form onSubmit={handleAddUser} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="text"
+                placeholder="Username"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Add User
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-2">
+        {users.map((user) => (
+          <div
+            key={user.username}
+            className="flex items-center justify-between p-4 rounded-lg bg-white shadow-sm"
+          >
+            <span>{user.username}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleRemoveUser(user.username)}
+              className="h-8 w-8"
+              disabled={user.username === 'Camryn'}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
-          
-          <div className="space-y-2">
-            {Object.entries(users).map(([username, user]) => (
-              <div key={username} className="flex items-center justify-between p-2 border rounded">
-                <div>
-                  <span className="font-medium">{username}</span>
-                  <span className="ml-2 text-sm text-gray-500">({user.role})</span>
-                </div>
-                {username !== 'admin' && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteUser(username)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+    </div>
   );
 }

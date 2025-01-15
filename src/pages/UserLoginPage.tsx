@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,14 +14,13 @@ export function UserLoginPage() {
   const { toast } = useToast();
   const { login, isAuthenticated } = useAuthStore();
 
-  // Redirect to calculator if already logged in
   useEffect(() => {
     if (isAuthenticated()) {
       navigate('/calculator');
     }
   }, [isAuthenticated, navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
