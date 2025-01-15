@@ -17,7 +17,7 @@ interface AuthStore {
   initializeFromStorage: () => void;
 }
 
-// Default users
+// Default users - this should always be available
 const DEFAULT_USERS = {
   'Camryn': {
     username: 'Camryn',
@@ -26,14 +26,13 @@ const DEFAULT_USERS = {
   }
 };
 
+// Initialize localStorage with default users if not already set
+if (!localStorage.getItem('users')) {
+  localStorage.setItem('users', JSON.stringify(DEFAULT_USERS));
+}
+
 const validateCredentials = (username: string, password: string): User | null => {
-  // Initialize users with default if empty
-  let users = JSON.parse(localStorage.getItem('users') || '{}');
-  if (Object.keys(users).length === 0) {
-    users = DEFAULT_USERS;
-    localStorage.setItem('users', JSON.stringify(users));
-  }
-  
+  const users = JSON.parse(localStorage.getItem('users') || JSON.stringify(DEFAULT_USERS));
   const user = users[username];
   
   if (user && user.password === password) {
@@ -46,70 +45,63 @@ const validateCredentials = (username: string, password: string): User | null =>
   return null;
 };
 
-export const useAuthStore = create<AuthStore>((set, get) => {
-  // Initialize from localStorage
-  const initialToken = localStorage.getItem('userToken');
-  const initialUser = localStorage.getItem('user');
+export const useAuthStore = create<AuthStore>((set, get) => ({
+  user: null,
+  token: null,
 
-  return {
-    user: initialUser ? JSON.parse(initialUser) : null,
-    token: initialToken,
-
-    setUser: (user) => {
-      set({ user });
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-      } else {
-        localStorage.removeItem('user');
-      }
-    },
-
-    setToken: (token) => {
-      set({ token });
-      if (token) {
-        localStorage.setItem('userToken', token);
-      } else {
-        localStorage.removeItem('userToken');
-      }
-    },
-
-    login: async (username: string, password: string) => {
-      const user = validateCredentials(username, password);
-      
-      if (user) {
-        // Generate a simple token (in a real app, this would be more secure)
-        const token = btoa(`${username}:${new Date().getTime()}`);
-        get().setUser(user);
-        get().setToken(token);
-        return true;
-      }
-      
-      return false;
-    },
-
-    logout: () => {
-      get().setUser(null);
-      get().setToken(null);
-    },
-
-    isAuthenticated: () => {
-      return !!get().user && !!get().token;
-    },
-
-    isAdmin: () => {
-      return get().user?.role === 'admin';
-    },
-
-    initializeFromStorage: () => {
-      const token = localStorage.getItem('userToken');
-      const user = localStorage.getItem('user');
-      
-      if (token && user) {
-        set({
-          token,
-          user: JSON.parse(user)
-        });
-      }
+  setUser: (user) => {
+    set({ user });
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
     }
-  };
-});
+  },
+
+  setToken: (token) => {
+    set({ token });
+    if (token) {
+      localStorage.setItem('userToken', token);
+    } else {
+      localStorage.removeItem('userToken');
+    }
+  },
+
+  login: async (username: string, password: string) => {
+    const user = validateCredentials(username, password);
+    
+    if (user) {
+      const token = btoa(`${username}:${new Date().getTime()}`);
+      get().setUser(user);
+      get().setToken(token);
+      return true;
+    }
+    
+    return false;
+  },
+
+  logout: () => {
+    get().setUser(null);
+    get().setToken(null);
+  },
+
+  isAuthenticated: () => {
+    return !!get().user && !!get().token;
+  },
+
+  isAdmin: () => {
+    return get().user?.role === 'admin';
+  },
+
+  initializeFromStorage: () => {
+    const token = localStorage.getItem('userToken');
+    const user = localStorage.getItem('user');
+    
+    if (token && user) {
+      set({
+        token,
+        user: JSON.parse(user)
+      });
+    }
+  }
+}));
