@@ -17,8 +17,23 @@ interface AuthStore {
   initializeFromStorage: () => void;
 }
 
+// Default users
+const DEFAULT_USERS = {
+  'Camryn': {
+    username: 'Camryn',
+    password: 'Elliot',
+    role: 'admin' as const
+  }
+};
+
 const validateCredentials = (username: string, password: string): User | null => {
-  const users = JSON.parse(localStorage.getItem('users') || '{}');
+  // Initialize users with default if empty
+  let users = JSON.parse(localStorage.getItem('users') || '{}');
+  if (Object.keys(users).length === 0) {
+    users = DEFAULT_USERS;
+    localStorage.setItem('users', JSON.stringify(users));
+  }
+  
   const user = users[username];
   
   if (user && user.password === password) {
