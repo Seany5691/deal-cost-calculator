@@ -14,6 +14,7 @@ export function UserLoginPage() {
   const { toast } = useToast();
   const { login, isAuthenticated } = useAuthStore();
 
+  // Redirect to calculator if already logged in
   useEffect(() => {
     if (isAuthenticated()) {
       navigate('/calculator');
@@ -56,7 +57,7 @@ export function UserLoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>User Login</CardTitle>
+          <CardTitle>Login</CardTitle>
           <CardDescription>
             Enter your credentials to access the calculator
           </CardDescription>

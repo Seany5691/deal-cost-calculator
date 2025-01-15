@@ -1,6 +1,6 @@
-import { StrictMode, useEffect } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { UserLoginPage } from '@/pages/UserLoginPage';
 import App from './App';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
@@ -16,6 +16,10 @@ if (!rootElement) {
 const router = createBrowserRouter([
   {
     path: '/',
+    element: <Navigate to="/login" replace />,
+  },
+  {
+    path: '/login',
     element: <UserLoginPage />,
   },
   {
