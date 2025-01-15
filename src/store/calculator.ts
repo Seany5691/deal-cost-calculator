@@ -321,20 +321,24 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
       const ranges = Object.entries(factorScales[factorKey])
         .map(([range, factor]) => {
           const [minStr, maxStr] = range.split('-');
+          const max = maxStr === '+' ? Infinity : Number(maxStr);
           return {
-            min: Number(minStr) || 0,
-            max: maxStr === '+' ? Infinity : Number(maxStr) || Infinity,
-            factor: Number(factor) || 0
+            min: Number(minStr),
+            max,
+            factor: Number(factor)
           };
         })
         .sort((a, b) => a.min - b.min);
 
+      // Find the matching range for the finance amount
       for (const { min, max, factor } of ranges) {
-        if (financeAmount >= min && financeAmount < max) {
+        if (financeAmount >= min && financeAmount <= max) {
           selectedFactor = factor;
           break;
         }
       }
+    } else {
+      console.warn(`No factor found for term: ${dealDetails.term}, escalation: ${dealDetails.escalation}`);
     }
 
     // Calculate hardware rental
