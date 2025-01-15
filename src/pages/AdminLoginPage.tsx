@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuthStore } from '@/store/auth';
+import { API_URL } from '@/config';
 
 export function AdminLoginPage() {
   const [username, setUsername] = useState('');
@@ -12,7 +12,6 @@ export function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuthStore();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,9 +29,20 @@ export function AdminLoginPage() {
         return;
       }
 
-      const success = await login(username.trim(), password.trim());
+      // Get admin token from server
+      const response = await fetch(`${API_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: username.trim(), password: password.trim() }),
+      });
 
-      if (success) {
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('adminTokenTimestamp', new Date().toISOString());
+        
         toast({
           title: 'Success',
           description: 'Logged in as admin',
