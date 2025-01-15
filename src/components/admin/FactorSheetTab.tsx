@@ -63,7 +63,9 @@ export function FactorSheetTab() {
     Object.entries(data).forEach(([term, escalationObj]) => {
       Object.entries(escalationObj).forEach(([escalation, rangeObj]) => {
         // Convert "36_months" and "0%" to "36-0"
-        const key = `${term.split('_')[0]}-${escalation.replace('%', '')}`;
+        const termValue = term.split('_')[0];
+        const escalationValue = escalation.replace('%', '');
+        const key = `${termValue}-${escalationValue}`;
         storeFormat[key] = rangeObj;
       });
     });
