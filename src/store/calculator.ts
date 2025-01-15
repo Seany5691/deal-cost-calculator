@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { API_URL } from '../config';
 
 interface DealDetails {
+  customerName: string;
   distanceToInstall: number;
   term: number;
   escalation: number;
@@ -68,6 +69,7 @@ interface CalculatorStore {
 }
 
 const defaultDealDetails: DealDetails = {
+  customerName: '',
   distanceToInstall: 0,
   term: 60,
   escalation: 0,

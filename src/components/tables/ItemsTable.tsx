@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { MinusCircle, PlusCircle, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';

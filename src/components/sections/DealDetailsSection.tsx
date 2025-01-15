@@ -16,6 +16,16 @@ export function DealDetailsSection() {
     <div className="space-y-4">
       <h2 className="text-2xl font-semibold text-black">Deal Details</h2>
       <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <label className="block mb-2 text-black">Customer Name</label>
+          <input
+            type="text"
+            value={dealDetails.customerName}
+            onChange={(e) => updateDealDetails({ customerName: e.target.value })}
+            className="w-full p-2 border rounded text-black"
+            placeholder="Enter customer name"
+          />
+        </div>
         <div>
           <label className="block mb-2 text-black">Distance To Install (KM)</label>
           <input
