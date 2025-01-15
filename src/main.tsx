@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserLoginPage } from '@/pages/UserLoginPage';
 import App from './App';
 import { AdminLoginPage } from '@/pages/AdminLoginPage';
@@ -13,10 +13,14 @@ if (!rootElement) {
   throw new Error('Failed to find the root element');
 }
 
+// Initialize auth store first
+const { initializeFromStorage } = useAuthStore.getState();
+initializeFromStorage();
+
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/login" replace />,
+    element: <App />,
   },
   {
     path: '/login',
@@ -35,10 +39,6 @@ const router = createBrowserRouter([
     element: <AdminPage />,
   },
 ]);
-
-// Initialize auth store
-const { initializeFromStorage } = useAuthStore.getState();
-initializeFromStorage();
 
 const root = createRoot(rootElement);
 

@@ -7,17 +7,16 @@ import { useNavigate } from 'react-router-dom';
 
 function App() {
   const { initializeStore } = useCalculatorStore();
-  const { isAuthenticated, initializeFromStorage } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     initializeStore();
-    initializeFromStorage();
-  }, [initializeStore, initializeFromStorage]);
+  }, [initializeStore]);
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/');
+      navigate('/login');
     }
   }, [isAuthenticated, navigate]);
 
