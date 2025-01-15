@@ -42,11 +42,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (user) {
       set({ currentUser: user });
       
-      // If it's the admin user, set the admin token
+      // If it's the admin user, get a real token from the server
       if (user.username === defaultAdmin.username) {
-        // In a real app, this would be a JWT from the server
-        localStorage.setItem('adminToken', 'admin-token');
-        localStorage.setItem('adminTokenTimestamp', new Date().toISOString());
+        try {
+          const response = await fetch(`${API_URL}/api/admin/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ username, password }),
+            mode: 'cors',
+            credentials: 'omit'
+          });
+
+          if (!response.ok) {
+            throw new Error('Admin authentication failed');
+          }
+
+          const data = await response.json();
+          localStorage.setItem('adminToken', data.token);
+          localStorage.setItem('adminTokenTimestamp', new Date().toISOString());
+        } catch (error) {
+          console.error('Failed to get admin token:', error);
+          return false;
+        }
       }
       
       return true;
