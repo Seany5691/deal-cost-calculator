@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { API_URL } from '../config';
+import { useAuthStore } from '@/store/auth';
 
 export function AdminLoginPage() {
   const [username, setUsername] = useState('');
@@ -11,60 +11,40 @@ export function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, isAdmin, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthenticated() && isAdmin()) {
+      navigate('/admin');
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      console.log('Attempting login with API URL:', API_URL);
-      const response = await fetch(`${API_URL}/api/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ username, password }),
-        mode: 'cors',
-        credentials: 'omit',
-        cache: 'no-cache'
-      });
+      const success = await login(username.trim(), password.trim());
 
-      const contentType = response.headers.get('content-type');
-      let data;
-
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
+      if (success && isAdmin()) {
+        toast({
+          title: 'Success',
+          description: 'Successfully logged in as admin',
+          variant: 'default',
+        });
+        navigate('/admin');
       } else {
-        const text = await response.text();
-        console.error('Non-JSON response:', text);
-        throw new Error('Invalid server response');
+        toast({
+          title: 'Error',
+          description: 'Invalid admin credentials',
+          variant: 'destructive',
+        });
       }
-
-      if (!response.ok) {
-        throw new Error(data?.message || 'Invalid credentials');
-      }
-
-      if (!data?.token) {
-        throw new Error('No token received from server');
-      }
-
-      localStorage.setItem('adminToken', data.token);
-      localStorage.setItem('adminTokenTimestamp', Date.now().toString());
-      
-      toast({
-        title: 'Success',
-        description: 'Successfully logged in',
-        variant: 'default',
-      });
-      
-      // Navigate to admin page using navigate instead of window.location
-      navigate('/admin');
     } catch (error) {
       console.error('Login error:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to login',
+        description: 'An error occurred during login',
         variant: 'destructive',
       });
     } finally {
@@ -104,9 +84,9 @@ export function AdminLoginPage() {
             />
           </div>
           <div className="space-y-2">
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               disabled={isLoading}
             >
               {isLoading ? 'Logging in...' : 'Login'}

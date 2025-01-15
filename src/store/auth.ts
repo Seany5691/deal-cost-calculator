@@ -17,116 +17,83 @@ interface AuthStore {
   initializeFromStorage: () => void;
 }
 
-// Temporary local users for testing
-const USERS = {
-  'Camryn': {
-    password: 'Elliot',
-    role: 'user' as const
-  },
-  'admin': {
-    password: 'admin123',
-    role: 'admin' as const
+const validateCredentials = (username: string, password: string): User | null => {
+  const users = JSON.parse(localStorage.getItem('users') || '{}');
+  const user = users[username];
+  
+  if (user && user.password === password) {
+    return {
+      username: user.username,
+      role: user.role
+    };
   }
-};
-
-const validateToken = (token: string | null): boolean => {
-  if (!token) return false;
-  try {
-    // Basic validation: check if it's a non-empty string
-    return typeof token === 'string' && token.length > 0;
-  } catch (error) {
-    console.error('Token validation error:', error);
-    return false;
-  }
+  
+  return null;
 };
 
 export const useAuthStore = create<AuthStore>((set, get) => {
-  // Initialize token from localStorage
+  // Initialize from localStorage
   const initialToken = localStorage.getItem('userToken');
   const initialUser = localStorage.getItem('user');
 
   return {
     user: initialUser ? JSON.parse(initialUser) : null,
-    token: validateToken(initialToken) ? initialToken : null,
-    
+    token: initialToken,
+
     setUser: (user) => {
+      set({ user });
       if (user) {
         localStorage.setItem('user', JSON.stringify(user));
       } else {
         localStorage.removeItem('user');
       }
-      set({ user });
     },
-    
-    setToken: (token) => {
-      if (token && validateToken(token)) {
-        localStorage.setItem('userToken', token);
-        set({ token });
-      } else {
-        console.log('Removing invalid token');
-        localStorage.removeItem('userToken');
-        set({ token: null });
-      }
-    },
-    
-    login: async (username: string, password: string) => {
-      console.log('Attempting login with username:', username);
-      
-      const user = USERS[username];
-      if (!user || user.password !== password) {
-        console.log('Invalid credentials');
-        return false;
-      }
 
-      const token = btoa(username + ':' + new Date().getTime());
-      
-      set({ 
-        token,
-        user: {
-          username,
-          role: user.role
-        }
-      });
-      
-      localStorage.setItem('userToken', token);
-      localStorage.setItem('user', JSON.stringify({
-        username,
-        role: user.role
-      }));
-      
-      console.log('Login successful');
-      return true;
+    setToken: (token) => {
+      set({ token });
+      if (token) {
+        localStorage.setItem('userToken', token);
+      } else {
+        localStorage.removeItem('userToken');
+      }
     },
-    
+
+    login: async (username: string, password: string) => {
+      const user = validateCredentials(username, password);
+      
+      if (user) {
+        // Generate a simple token (in a real app, this would be more secure)
+        const token = btoa(`${username}:${new Date().getTime()}`);
+        get().setUser(user);
+        get().setToken(token);
+        return true;
+      }
+      
+      return false;
+    },
+
     logout: () => {
-      localStorage.removeItem('userToken');
-      localStorage.removeItem('user');
-      set({ user: null, token: null });
+      get().setUser(null);
+      get().setToken(null);
     },
-    
+
     isAuthenticated: () => {
-      const state = get();
-      return !!state.token && !!state.user;
+      return !!get().user && !!get().token;
     },
-    
+
     isAdmin: () => {
-      const state = get();
-      return state.user?.role === 'admin';
+      return get().user?.role === 'admin';
     },
-    
+
     initializeFromStorage: () => {
       const token = localStorage.getItem('userToken');
       const user = localStorage.getItem('user');
       
       if (token && user) {
-        try {
-          const parsedUser = JSON.parse(user);
-          set({ token, user: parsedUser });
-        } catch (error) {
-          console.error('Error parsing stored user:', error);
-          localStorage.removeItem('userToken');
-          localStorage.removeItem('user');
-        }
+        set({
+          token,
+          user: JSON.parse(user)
+        });
       }
     }
   };
