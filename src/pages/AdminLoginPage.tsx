@@ -11,26 +11,37 @@ export function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login, isAdmin, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated() && isAdmin()) {
+    // Only redirect if user is already logged in as Camryn
+    const user = localStorage.getItem('user');
+    if (user && JSON.parse(user).username === 'Camryn') {
       navigate('/admin');
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      // Only allow Camryn to login as admin
+      if (username !== 'Camryn') {
+        toast({
+          title: 'Error',
+          description: 'Invalid admin credentials',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const success = await login(username.trim(), password.trim());
 
-      if (success && isAdmin()) {
+      if (success) {
         toast({
           title: 'Success',
           description: 'Successfully logged in as admin',
-          variant: 'default',
         });
         navigate('/admin');
       } else {
@@ -83,23 +94,13 @@ export function AdminLoginPage() {
               autoComplete="current-password"
             />
           </div>
-          <div className="space-y-2">
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline"
-              className="w-full"
-              onClick={() => navigate('/')}
-            >
-              Back to Calculator
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Logging in...' : 'Login'}
+          </Button>
         </form>
       </div>
     </div>

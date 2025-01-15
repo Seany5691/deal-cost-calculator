@@ -11,18 +11,13 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('App mounted, initializing stores');
     initializeStore();
     initializeFromStorage();
   }, [initializeStore, initializeFromStorage]);
 
   useEffect(() => {
-    console.log('Checking authentication in App');
     if (!isAuthenticated()) {
-      console.log('User not authenticated, redirecting to login');
       navigate('/');
-    } else {
-      console.log('User is authenticated');
     }
   }, [isAuthenticated, navigate]);
 

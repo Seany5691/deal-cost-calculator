@@ -17,28 +17,35 @@ interface AuthStore {
   initializeFromStorage: () => void;
 }
 
-// Default users - this should always be available
-const DEFAULT_USERS = {
-  'Camryn': {
-    username: 'Camryn',
-    password: 'Elliot',
-    role: 'admin' as const
-  }
+// The only admin user
+const ADMIN_USER = {
+  username: 'Camryn',
+  password: 'Elliot',
+  role: 'admin' as const
 };
 
 // Initialize localStorage with default users if not already set
 if (!localStorage.getItem('users')) {
-  localStorage.setItem('users', JSON.stringify(DEFAULT_USERS));
+  localStorage.setItem('users', JSON.stringify({}));
 }
 
 const validateCredentials = (username: string, password: string): User | null => {
-  const users = JSON.parse(localStorage.getItem('users') || JSON.stringify(DEFAULT_USERS));
+  // Check if it's the admin user
+  if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
+    return {
+      username: ADMIN_USER.username,
+      role: ADMIN_USER.role
+    };
+  }
+
+  // Check other users
+  const users = JSON.parse(localStorage.getItem('users') || '{}');
   const user = users[username];
   
-  if (user && user.password === password) {
+  if (user && user.password === password && username !== 'Camryn') {
     return {
       username: user.username,
-      role: user.role
+      role: 'user' // All other users are regular users
     };
   }
   
@@ -90,7 +97,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   isAdmin: () => {
-    return get().user?.role === 'admin';
+    return get().user?.username === 'Camryn';
   },
 
   initializeFromStorage: () => {
