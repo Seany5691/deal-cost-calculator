@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth';
-import { Link } from 'react-router-dom';
 
 export function UserLoginPage() {
   const [username, setUsername] = useState('');
@@ -83,11 +82,6 @@ export function UserLoginPage() {
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
-            <div className="text-center mt-4">
-              <Link to="/admin/login" className="text-sm text-blue-600 hover:underline">
-                Admin Login
-              </Link>
-            </div>
           </form>
         </CardContent>
       </Card>

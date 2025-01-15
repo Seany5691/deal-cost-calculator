@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -57,6 +57,10 @@ export function AdminLoginPage() {
     }
   };
 
+  const handleBackToCalculator = () => {
+    navigate('/calculator');
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-[350px]">
@@ -93,11 +97,14 @@ export function AdminLoginPage() {
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
-            <div className="text-center mt-4">
-              <Link to="/calculator" className="text-sm text-blue-600 hover:underline">
-                Back to Calculator
-              </Link>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mt-2"
+              onClick={handleBackToCalculator}
+            >
+              Back to Calculator
+            </Button>
           </form>
         </CardContent>
       </Card>
