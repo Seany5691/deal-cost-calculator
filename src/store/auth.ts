@@ -51,8 +51,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   addUser: (user: User) => {
     const users = get().users;
-    set({ users: [...users, user] });
-    localStorage.setItem('users', JSON.stringify([...users, user]));
+    const newUsers = [...users, user];
+    set({ users: newUsers });
+    localStorage.setItem('users', JSON.stringify(newUsers));
   },
 
   removeUser: (username: string) => {
@@ -62,15 +63,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initializeFromStorage: () => {
-    const storedUsers = localStorage.getItem('users');
-    if (storedUsers) {
-      const users = JSON.parse(storedUsers);
-      // Ensure admin user is always present
-      if (!users.some((u: User) => u.username === defaultAdmin.username)) {
-        users.push(defaultAdmin);
+    try {
+      const storedUsers = localStorage.getItem('users');
+      let users: User[] = [defaultAdmin];
+
+      if (storedUsers) {
+        const parsedUsers = JSON.parse(storedUsers);
+        if (Array.isArray(parsedUsers)) {
+          // Ensure admin user is always present
+          if (!parsedUsers.some(u => u.username === defaultAdmin.username)) {
+            users = [...parsedUsers, defaultAdmin];
+          } else {
+            users = parsedUsers;
+          }
+        }
       }
+
       set({ users });
-    } else {
+      localStorage.setItem('users', JSON.stringify(users));
+    } catch (error) {
+      console.error('Error initializing auth store:', error);
+      // Reset to default state if there's an error
+      set({ users: [defaultAdmin] });
       localStorage.setItem('users', JSON.stringify([defaultAdmin]));
     }
   },
