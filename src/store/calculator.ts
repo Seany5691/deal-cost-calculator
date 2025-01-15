@@ -504,8 +504,30 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
       }
 
       if (factorsResponse.ok) {
-        factors = await factorsResponse.json();
-        console.log('Fetched factors:', factors);
+        const rawFactors = await factorsResponse.json();
+        console.log('Fetched raw factors:', rawFactors);
+        
+        // Convert factors to the correct format
+        const convertedFactors: { [key: string]: { [key: string]: number } } = {};
+        Object.entries(rawFactors as Record<string, Record<string, Record<string, number>>>).forEach(([term, escalationObj]) => {
+          Object.entries(escalationObj).forEach(([escalation, rangeObj]) => {
+            const termValue = term.split('_')[0];  // "36_months" -> "36"
+            const escalationValue = escalation.replace('%', ''); // "0%" -> "0"
+            const key = `${termValue}-${escalationValue}`;
+            
+            convertedFactors[key] = {};
+            Object.entries(rangeObj).forEach(([range, factor]) => {
+              if (range === '100000+') {
+                convertedFactors[key]['100001-Infinity'] = factor;
+              } else {
+                convertedFactors[key][range] = factor;
+              }
+            });
+          });
+        });
+        
+        factors = convertedFactors;
+        console.log('Converted factors:', factors);
       } else {
         console.error('Failed to fetch factors:', {
           status: factorsResponse.status,
