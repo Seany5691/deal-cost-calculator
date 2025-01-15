@@ -7,42 +7,42 @@
           "cost": 808.96,
           "id": "yealink-t31p",
           "locked": true,
-          "name": "Yealink T31P (B&W desk- excludes PSU)",
+          "name": "Yealink T31P (B&W Desk- Excludes PSU)",
           "quantity": 0
         },
         {
           "cost": 1213.44,
           "id": "yealink-t34w",
           "locked": true,
-          "name": "Yealink T34W (Colour desk- includes PSU)",
+          "name": "Yealink T34W (Colour Desk- Includes PSU)",
           "quantity": 0
         },
         {
           "cost": 1693.76,
           "id": "yealink-t43u",
           "locked": true,
-          "name": "Yealink T43U Switchboard (B&W- excludes PSU)",
+          "name": "Yealink T43U Switchboard (B&W- Excludes PSU)",
           "quantity": 0
         },
         {
           "cost": 1693.76,
           "id": "yealink-t44u",
           "locked": true,
-          "name": "Yealink T44U Switchboard (Colour- excludes PSU)",
+          "name": "Yealink T44U Switchboard (Colour- Excludes PSU)",
           "quantity": 0
         },
         {
           "cost": 1820.16,
           "id": "yealink-w73p",
           "locked": true,
-          "name": "Yealink W73P Cordless (Handset & base)",
+          "name": "Yealink W73P Cordless (Handset & Base)",
           "quantity": 0
         },
         {
           "cost": 1137.60,
           "id": "yealink-w73h",
           "locked": true,
-          "name": "Yealink W73H (Handset only)",
+          "name": "Yealink W73H (Handset Only)",
           "quantity": 0
         },
         {
@@ -50,6 +50,69 @@
           "id": "mobile-app",
           "locked": true,
           "name": "Additional Mobile App",
+          "quantity": 0
+        },
+        {
+          "cost": 475.00,
+          "id": "poe-switch-4",
+          "locked": false,
+          "name": "4 Port POE Switch",
+          "quantity": 0
+        },
+        {
+          "cost": 900.00,
+          "id": "poe-switch-8",
+          "locked": false,
+          "name": "8 Port POE Switch - Gigabit",
+          "quantity": 0
+        },
+        {
+          "cost": 2450.00,
+          "id": "poe-switch-16",
+          "locked": false,
+          "name": "16 Port POE Gigabit Switch",
+          "quantity": 0
+        },
+        {
+          "cost": 975.00,
+          "id": "reyee-ap-gigabit",
+          "locked": false,
+          "name": "Reyee Access Point Gigabit",
+          "quantity": 0
+        },
+        {
+          "cost": 725.00,
+          "id": "reyee-ap-fast",
+          "locked": false,
+          "name": "Reyee Access Point Fast Ethernet",
+          "quantity": 0
+        },
+        {
+          "cost": 1125.00,
+          "id": "reyee-cloud-router",
+          "locked": false,
+          "name": "Reyee Cloud Router",
+          "quantity": 0
+        },
+        {
+          "cost": 390.00,
+          "id": "surge-protection",
+          "locked": false,
+          "name": "Surge Protection",
+          "quantity": 0
+        },
+        {
+          "cost": 500.00,
+          "id": "multi-plug",
+          "locked": false,
+          "name": "Multi plug",
+          "quantity": 0
+        },
+        {
+          "cost": 1075.00,
+          "id": "server-rack",
+          "locked": false,
+          "name": "Server Rack",
           "quantity": 0
         }
       ],
@@ -59,22 +122,27 @@
       "id": "connectivity",
       "items": [
         {
-          "cost": 489,
+          "cost": 489.00,
           "id": "vodacom-lte",
           "name": "Vodacom LTE",
           "quantity": 0
         },
         {
-          "cost": 699,
-          "id": "fiber-line",
+          "cost": 699.00,
+          "id": "mtn-lte",
           "name": "MTN LTE",
           "quantity": 0
         },
         {
-          "cost": 199,
+          "cost": 199.00,
           "id": "lte-router",
-          "locked": false,
           "name": "LTE Router",
+          "quantity": 0
+        },
+        {
+          "cost": 350.00,
+          "id": "melon-sim",
+          "name": "Melon Sim",
           "quantity": 0
         }
       ],
@@ -84,15 +152,27 @@
       "id": "licensing",
       "items": [
         {
-          "cost": 49,
-          "id": "basic-license",
-          "name": "Basic License",
+          "cost": 90.00,
+          "id": "premium-license",
+          "name": "Licensing Premium",
           "quantity": 0
         },
         {
-          "cost": 89,
-          "id": "premium-license",
-          "name": "Premium License",
+          "cost": 249.00,
+          "id": "sla-0-5",
+          "name": "Service Level Agreement (0 - 5 users)",
+          "quantity": 0
+        },
+        {
+          "cost": 349.00,
+          "id": "sla-6-10",
+          "name": "Service Level Agreement (6 - 10 users)",
+          "quantity": 0
+        },
+        {
+          "cost": 449.00,
+          "id": "sla-11-plus",
+          "name": "Service Level Agreement (11 users or more)",
           "quantity": 0
         }
       ],
@@ -102,85 +182,85 @@
   "factors": {
     "36_months": {
       "0%": {
-        "0-20000": 0.03891,
-        "20001-50000": 0.03761,
-        "50001-100000": 0.03641,
-        "100000+": 0.03561
+        "0-20000": 0.03894,
+        "20001-50000": 0.03786,
+        "50001-100000": 0.03732,
+        "100000+": 0.03679
       },
       "10%": {
-        "0-20000": 0.04012,
-        "20001-50000": 0.03882,
-        "50001-100000": 0.03762,
-        "100000+": 0.03682
+        "0-20000": 0.03585,
+        "20001-50000": 0.03481,
+        "50001-100000": 0.03428,
+        "100000+": 0.03377
       },
       "15%": {
-        "0-20000": 0.04133,
-        "20001-50000": 0.04003,
-        "50001-100000": 0.03883,
-        "100000+": 0.03803
+        "0-20000": 0.03442,
+        "20001-50000": 0.03341,
+        "50001-100000": 0.03288,
+        "100000+": 0.033239
       }
     },
     "48_months": {
       "0%": {
-        "0-20000": 0.03133,
-        "20001-50000": 0.03003,
-        "50001-100000": 0.02883,
-        "100000+": 0.02803
+        "0-20000": 0.03248,
+        "20001-50000": 0.03132,
+        "50001-100000": 0.03073,
+        "100000+": 0.03679
       },
       "10%": {
-        "0-20000": 0.03254,
-        "20001-50000": 0.03124,
-        "50001-100000": 0.03004,
-        "100000+": 0.02924
+        "0-20000": 0.02882,
+        "20001-50000": 0.02772,
+        "50001-100000": 0.02717,
+        "100000+": 0.02664
       },
       "15%": {
-        "0-20000": 0.03375,
-        "20001-50000": 0.03245,
-        "50001-100000": 0.03125,
-        "100000+": 0.03045
+        "0-20000": 0.02715,
+        "20001-50000": 0.02609,
+        "50001-100000": 0.02556,
+        "100000+": 0.02504
       }
     },
     "60_months": {
       "0%": {
-        "0-20000": 0.02695,
-        "20001-50000": 0.02565,
-        "50001-100000": 0.02445,
-        "100000+": 0.02365
+        "0-20000": 0.02875,
+        "20001-50000": 0.02752,
+        "50001-100000": 0.0269,
+        "100000+": 0.02632
       },
       "10%": {
-        "0-20000": 0.02816,
-        "20001-50000": 0.02686,
-        "50001-100000": 0.02566,
-        "100000+": 0.02486
+        "0-20000": 0.02466,
+        "20001-50000": 0.02352,
+        "50001-100000": 0.02294,
+        "100000+": 0.02241
       },
       "15%": {
-        "0-20000": 0.02937,
-        "20001-50000": 0.02807,
-        "50001-100000": 0.02687,
-        "100000+": 0.02607
+        "0-20000": 0.02282,
+        "20001-50000": 0.02172,
+        "50001-100000": 0.02117,
+        "100000+": 0.02065
       }
     }
   },
   "scales": {
     "installation": {
-      "0-4": 2500,
+      "0-4": 3500,
       "5-8": 3500,
-      "9-16": 4500,
-      "17-32": 6000,
-      "33+": 7500
+      "9-16": 7000,
+      "17-32": 10500,
+      "33+": 15000
     },
     "finance_fee": {
-      "0-20000": 0,
-      "20001-50000": 0,
-      "50001-100000": 0,
-      "100001+": 0
+      "0-20000": 1000,
+      "20001-50000": 1000,
+      "50001-100000": 2000,
+      "100001+": 3000
     },
     "gross_profit": {
-      "0-4": 1,
-      "5-8": 0,
-      "9-16": 0,
-      "17-32": 0,
-      "33+": 0
+      "0-4": 15000,
+      "5-8": 20000,
+      "9-16": 25000,
+      "17-32": 30000,
+      "33+": 35000
     }
   }
 }
