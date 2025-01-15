@@ -77,7 +77,7 @@ export function FactorSheetTab() {
   const fetchFactors = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_URL}/api/admin/scales`, {
+      const response = await fetch(`${API_URL}/api/admin/factors`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
@@ -88,8 +88,7 @@ export function FactorSheetTab() {
         throw new Error('Failed to fetch factors');
       }
 
-      const data = await response.json();
-      const formattedFactors = data.factors || {};
+      const formattedFactors = await response.json();
       
       setFactors(formattedFactors);
       setFactorScales(convertToStoreFormat(formattedFactors));
@@ -126,33 +125,16 @@ export function FactorSheetTab() {
       };
       setFactors(updatedFactors);
 
-      // First fetch current data to preserve scales
+      // Update API
       const token = localStorage.getItem('adminToken');
-      const currentResponse = await fetch(`${API_URL}/api/admin/scales`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!currentResponse.ok) {
-        throw new Error('Failed to fetch current data');
-      }
-
-      const currentData = await currentResponse.json();
-
-      // Update API with merged data
-      const response = await fetch(`${API_URL}/api/admin/scales`, {
+      const response = await fetch(`${API_URL}/api/admin/factors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          ...currentData,
-          factors: updatedFactors
-        })
+        body: JSON.stringify(updatedFactors)
       });
 
       if (!response.ok) {
