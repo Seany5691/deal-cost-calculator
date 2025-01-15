@@ -36,17 +36,11 @@ const router = createBrowserRouter([
   },
 ]);
 
-const root = createRoot(rootElement);
-
 // Initialize auth store
-console.log('Initializing auth store');
 const { initializeFromStorage } = useAuthStore.getState();
 initializeFromStorage();
 
-// Add error boundary
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
-});
+const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>

@@ -1,7 +1,8 @@
-import React, { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth';
 
@@ -11,28 +12,21 @@ export function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login, isAuthenticated } = useAuthStore();
-
-  useEffect(() => {
-    // Only redirect if user is already logged in as Camryn
-    const user = localStorage.getItem('user');
-    if (user && JSON.parse(user).username === 'Camryn') {
-      navigate('/admin');
-    }
-  }, [navigate]);
+  const { login } = useAuthStore();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Only allow Camryn to login as admin
-      if (username !== 'Camryn') {
+      // Only allow Camryn to log in as admin
+      if (username.trim() !== 'Camryn') {
         toast({
           title: 'Error',
           description: 'Invalid admin credentials',
           variant: 'destructive',
         });
+        setIsLoading(false);
         return;
       }
 
@@ -41,7 +35,7 @@ export function AdminLoginPage() {
       if (success) {
         toast({
           title: 'Success',
-          description: 'Successfully logged in as admin',
+          description: 'Logged in as admin',
         });
         navigate('/admin');
       } else {
@@ -64,45 +58,44 @@ export function AdminLoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gunmetal">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-900">Admin Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
-            <Input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle>Admin Login</CardTitle>
+          <CardDescription>
+            Enter your admin credentials
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button
+              type="submit"
               className="w-full"
               disabled={isLoading}
-              autoComplete="username"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full"
-              disabled={isLoading}
-              autoComplete="current-password"
-            />
-          </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Logging in...' : 'Login'}
-          </Button>
-        </form>
-      </div>
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
