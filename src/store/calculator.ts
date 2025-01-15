@@ -80,10 +80,13 @@ const DEFAULT_SECTIONS: Section[] = [
     id: 'hardware',
     name: 'Hardware',
     items: [
-      { id: 'switchboard', name: 'Switchboard', cost: 0, quantity: 0, locked: true },
-      { id: 'desktop-phone', name: 'Desktop Phone', cost: 0, quantity: 0, locked: true },
-      { id: 'cordless-phone', name: 'Cordless Phone', cost: 0, quantity: 0, locked: true },
-      { id: 'mobile-apps', name: 'Mobile Apps', cost: 0, quantity: 0, locked: true }
+      { id: 'yealink-t31p', name: 'Yealink T31P (B&W desk- excludes PSU)', cost: 808.96, quantity: 0, locked: true },
+      { id: 'yealink-t34w', name: 'Yealink T34W (Colour desk- includes PSU)', cost: 1213.44, quantity: 0, locked: true },
+      { id: 'yealink-t43u', name: 'Yealink T43U Switchboard (B&W- excludes PSU)', cost: 1693.76, quantity: 0, locked: true },
+      { id: 'yealink-t44u', name: 'Yealink T44U Switchboard (Colour- excludes PSU)', cost: 1693.76, quantity: 0, locked: true },
+      { id: 'yealink-w73p', name: 'Yealink W73P Cordless (Handset & base)', cost: 1820.16, quantity: 0, locked: true },
+      { id: 'yealink-w73h', name: 'Yealink W73H (Handset only)', cost: 1137.60, quantity: 0, locked: true },
+      { id: 'mobile-app', name: 'Additional Mobile App', cost: 0, quantity: 0, locked: true }
     ]
   },
   {
@@ -197,7 +200,7 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
     // Calculate number of extensions
     const hardwareSection = sections.find(s => s.id === 'hardware');
     const extensions = hardwareSection?.items.reduce((sum, item) => {
-      if (['switchboard', 'desktop-phone', 'cordless-phone', 'mobile-apps'].includes(item.id)) {
+      if (['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app'].includes(item.id)) {
         return sum + (Number(item.quantity) || 0);
       }
       return sum;
@@ -417,7 +420,7 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
             ...section,
             items: section.items.map((item: Item) => ({
               ...item,
-              locked: section.id === 'hardware' && ['switchboard', 'desktop-phone', 'cordless-phone', 'mobile-apps'].includes(item.id)
+              locked: section.id === 'hardware' && ['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app'].includes(item.id)
             }))
           }));
         }
