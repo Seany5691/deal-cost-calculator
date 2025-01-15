@@ -316,29 +316,39 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
     // Get selected factor based on term and escalation
     let selectedFactor = 0;
     const factorKey = `${dealDetails.term}-${dealDetails.escalation}`;
+    console.log('Looking for factor with key:', factorKey);
+    console.log('Available factor scales:', factorScales);
     
     if (factorScales && factorScales[factorKey]) {
+      console.log('Found factor scales for key:', factorScales[factorKey]);
       const ranges = Object.entries(factorScales[factorKey])
         .map(([range, factor]) => {
           const [minStr, maxStr] = range.split('-');
-          const max = maxStr === '+' ? Infinity : Number(maxStr);
-          return {
-            min: Number(minStr),
-            max,
-            factor: Number(factor)
-          };
+          const min = Number(minStr);
+          const max = maxStr === 'Infinity' ? Infinity : Number(maxStr);
+          console.log('Processing range:', range, 'min:', min, 'max:', max, 'factor:', factor);
+          return { min, max, factor: Number(factor) };
         })
         .sort((a, b) => a.min - b.min);
 
+      console.log('Sorted ranges:', ranges);
+      console.log('Finance amount:', financeAmount);
+
       // Find the matching range for the finance amount
       for (const { min, max, factor } of ranges) {
+        console.log('Checking range - min:', min, 'max:', max, 'financeAmount:', financeAmount);
         if (financeAmount >= min && financeAmount <= max) {
+          console.log('Found matching factor:', factor);
           selectedFactor = factor;
           break;
         }
       }
+
+      if (selectedFactor === 0) {
+        console.warn('No matching range found for finance amount:', financeAmount);
+      }
     } else {
-      console.warn(`No factor found for term: ${dealDetails.term}, escalation: ${dealDetails.escalation}`);
+      console.warn('No factor found for key:', factorKey, 'Available keys:', Object.keys(factorScales || {}));
     }
 
     // Calculate hardware rental

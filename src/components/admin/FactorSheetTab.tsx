@@ -63,10 +63,19 @@ export function FactorSheetTab() {
     Object.entries(data).forEach(([term, escalationObj]) => {
       Object.entries(escalationObj).forEach(([escalation, rangeObj]) => {
         // Convert "36_months" and "0%" to "36-0"
-        const termValue = term.split('_')[0];
-        const escalationValue = escalation.replace('%', '');
+        const termValue = term.split('_')[0];  // "36_months" -> "36"
+        const escalationValue = escalation.replace('%', ''); // "0%" -> "0"
         const key = `${termValue}-${escalationValue}`;
-        storeFormat[key] = rangeObj;
+        storeFormat[key] = {};
+        
+        // Convert each range
+        Object.entries(rangeObj).forEach(([range, factor]) => {
+          if (range === '100000+') {
+            storeFormat[key]['100001-Infinity'] = factor;
+          } else {
+            storeFormat[key][range] = factor;
+          }
+        });
       });
     });
     
