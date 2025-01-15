@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,6 +93,11 @@ export function AdminLoginPage() {
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
+            <div className="text-center mt-4">
+              <Link to="/calculator" className="text-sm text-blue-600 hover:underline">
+                Back to Calculator
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>
