@@ -200,7 +200,7 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
     // Calculate number of extensions
     const hardwareSection = sections.find(s => s.id === 'hardware');
     const extensions = hardwareSection?.items.reduce((sum, item) => {
-      if (['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app'].includes(item.id)) {
+      if (['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app', 'yealink-t54w', 'yealink-t53w', 'yealink-t52w', 'yealink-t46s', 'yealink-t48s', 'yealink-t49g', 'yealink-t55a', 'yealink-t57w', 'yealink-t58a', 'yealink-t56a', 'yealink-t54s', 'yealink-t53s', 'yealink-t52s', 'yealink-t46g', 'yealink-t48g', 'yealink-t49s'].includes(item.id)) {
         return sum + (Number(item.quantity) || 0);
       }
       return sum;
@@ -420,7 +420,7 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
             ...section,
             items: section.items.map((item: Item) => ({
               ...item,
-              locked: section.id === 'hardware' && ['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app'].includes(item.id)
+              locked: section.id === 'hardware' && ['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app', 'yealink-t54w', 'yealink-t53w', 'yealink-t52w', 'yealink-t46s', 'yealink-t48s', 'yealink-t49g', 'yealink-t55a', 'yealink-t57w', 'yealink-t58a', 'yealink-t56a', 'yealink-t54s', 'yealink-t53s', 'yealink-t52s', 'yealink-t46g', 'yealink-t48g', 'yealink-t49s'].includes(item.id)
             }))
           }));
         }
