@@ -434,7 +434,14 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
       }
 
       const sectionsData = await sectionsResponse.json();
-      set({ sections: sectionsData.sections || [] });
+      const sections = sectionsData.map((section: Section) => ({
+        ...section,
+        items: section.items.map((item: Item) => ({
+          ...item,
+          locked: section.id === 'hardware' && ['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app'].includes(item.id)
+        }))
+      }));
+      set({ sections });
 
       // Fetch all scales in parallel
       const [scalesResponse, factorsResponse] = await Promise.all([
@@ -459,11 +466,30 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
       const scalesData = await scalesResponse.json();
       const factorsData = await factorsResponse.json();
 
+      // Convert factors to the correct format
+      const convertedFactors: { [key: string]: { [key: string]: number } } = {};
+      Object.entries(factorsData as Record<string, Record<string, Record<string, number>>>).forEach(([term, escalationObj]) => {
+        Object.entries(escalationObj).forEach(([escalation, rangeObj]) => {
+          const termValue = term.split('_')[0];  // "36_months" -> "36"
+          const escalationValue = escalation.replace('%', ''); // "0%" -> "0"
+          const key = `${termValue}-${escalationValue}`;
+          
+          convertedFactors[key] = {};
+          Object.entries(rangeObj).forEach(([range, factor]) => {
+            if (range === '100000+') {
+              convertedFactors[key]['100001-Infinity'] = factor;
+            } else {
+              convertedFactors[key][range] = factor;
+            }
+          });
+        });
+      });
+
       set({
         baseGrossProfit: scalesData.gross_profit || {},
         financeScales: scalesData.finance_fee || {},
         installationScales: scalesData.installation || {},
-        factorScales: factorsData || {},
+        factorScales: convertedFactors || {},
         additionalCosts: scalesData.additional_costs || {
           cost_per_kilometer: 15,
           cost_per_point: 250
