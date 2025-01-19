@@ -1,249 +1,375 @@
 # Deal Cost Calculator
 
-A modern, React-based calculator application for computing deal costs, including hardware, connectivity, licensing, and settlement calculations.
+A comprehensive React-based calculator application for computing deal costs, including hardware, connectivity, licensing, and settlement calculations. This document serves as the complete technical specification and user guide.
 
-## Features
+## Core Features and Implementation Details
 
-### 1. Item Management
-- **Hardware Section**
-  - Predefined items like Switchboard, Desktop Phone, Cordless Phone, etc.
-  - Dynamic quantity adjustment with plus/minus buttons
-  - Real-time total cost calculations
-  - Ability to add custom items
+### 1. Deal Details Section (`DealDetailsSection.tsx`)
+- **Customer Information**
+  - Customer name input (stored in `dealDetails.customerName`)
+  - Used in PDF generation and quote identification
+- **Installation Details**
+  - Distance to installation (stored in `dealDetails.distanceToInstall`)
+  - Affects cost calculations based on `additionalCosts.cost_per_kilometer`
+- **Term Configuration**
+  - Selectable terms: 36, 48, or 60 months
+  - Stored in `dealDetails.term`
+  - Impacts rental factor calculations
+- **Escalation Settings**
+  - Options: 0%, 5%, 10%, 15%
+  - Stored in `dealDetails.escalation`
+  - Used in settlement and rental calculations
+- **Financial Inputs**
+  - Additional gross profit input (`dealDetails.additionalGrossProfit`)
+  - Settlement amount input (`dealDetails.settlement`)
 
-- **Connectivity Section**
-  - LTE options from different providers
-  - Router configurations
-  - Quantity-based calculations
+### 2. Hardware Section (`HardwareSection.tsx`)
+- **Pre-configured Items**
+  ```typescript
+  interface Item {
+    id: string;
+    name: string;
+    cost: number;
+    quantity: number;
+    locked?: boolean;
+  }
+  ```
+- **Default Hardware Options**
+  - Yealink T31P: Entry-level IP phone
+  - Yealink T34W: Mid-range wireless IP phone
+  - Yealink T43U: Advanced IP phone
+  - Yealink T44U: Premium IP phone
+  - W73P: DECT base station
+  - W73H: DECT handset
+  - Mobile app licenses
+- **Cost Calculations**
+  ```typescript
+  hardwareCost = sum(items.map(item => item.cost * item.quantity));
+  distanceCost = dealDetails.distanceToInstall * additionalCosts.cost_per_kilometer;
+  extensionCost = totalExtensions * additionalCosts.cost_per_point;
+  ```
+- **Installation Scale Logic**
+  ```typescript
+  const getInstallationCost = (extensions: number) => {
+    if (extensions <= 4) return installationScales['0-4'];
+    if (extensions <= 8) return installationScales['5-8'];
+    if (extensions <= 16) return installationScales['9-16'];
+    if (extensions <= 32) return installationScales['17-32'];
+    return installationScales['33+'];
+  };
+  ```
 
-- **Licensing Section**
-  - Various license types (Premium, Standard)
-  - SLA and usage-based pricing
-  - Per-copy cost calculations
+### 3. Connectivity Section (`ConnectivitySection.tsx`)
+- **Provider Options**
+  - MTN APN
+  - Vodacom APN
+  - Rain
+  - Fibre (various speeds)
+- **Monthly Cost Structure**
+  ```typescript
+  monthlyConnectivityCost = sum(connectivityItems.map(item => item.cost * item.quantity));
+  ```
 
-### 2. Deal Details
-- Distance calculation with per-kilometer costs
-- Configurable term length (12-60 months)
-- Escalation rate options (0%, 5%, 10%, 15%)
-- Additional gross profit adjustments
-- Settlement calculations
+### 4. Licensing Section (`LicensingSection.tsx`)
+- **License Types**
+  - Premium: Full feature set
+  - Standard: Basic features
+  - Custom: Configurable options
+- **Pricing Model**
+  ```typescript
+  monthlyLicensingCost = sum(licenseItems.map(item => item.cost * item.quantity));
+  ```
 
-### 3. Settlement Calculator
-- Precise date-based calculations
-- Year-by-year breakdown showing:
-  - Start and end dates for each year
-  - Completed years
-  - Remaining months for current year
-  - Future year projections
-- Automatic escalation application
-- Support for both starting and current rental calculations
+### 5. Settlement Calculator (`SettlementSection.tsx`)
+- **Date-based Calculations**
+  ```typescript
+  const calculateSettlement = (
+    startDate: Date,
+    currentDate: Date,
+    term: number,
+    escalation: number,
+    rental: number
+  ) => {
+    const completedYears = Math.floor(monthsDiff / 12);
+    const remainingMonths = monthsDiff % 12;
+    const futureYears = Math.ceil((term - monthsDiff) / 12);
+    // ... settlement calculation logic
+  };
+  ```
 
-### 4. Total Costs Section
-Comprehensive cost breakdown including:
-- Hardware installation costs
-- Connectivity costs
-- Licensing costs
-- Finance fees
-- Gross profit
-- Total payout
-- Hardware rental
-- Monthly Recurring Costs (MRC)
-- Total costs (Ex VAT and Inc VAT)
+### 6. Total Costs Display (`TotalCostsSection.tsx`)
+- **Cost Breakdowns**
+  ```typescript
+  interface TotalCosts {
+    hardware: number;
+    installation: {
+      distance: number;
+      extensions: number;
+      scale: number;
+    };
+    grossProfit: number;
+    financeFee: number;
+    settlement: number;
+    monthly: {
+      hardware: number;
+      connectivity: number;
+      licensing: number;
+      total: number;
+    };
+    vat: {
+      hardware: number;
+      monthly: number;
+    };
+  }
+  ```
 
-## Technical Implementation
+### 7. PDF Generation (`GeneratePDFButton.tsx`)
+- **Implementation Details**
+  ```typescript
+  const generatePDF = async () => {
+    const doc = new jsPDF();
+    // Header
+    doc.setFontSize(20);
+    doc.text('Deal Cost Calculator Quote', 20, 20);
+    // Customer Details
+    doc.setFontSize(12);
+    doc.text(`Customer: ${dealDetails.customerName}`, 20, 40);
+    // ... more PDF generation logic
+  };
+  ```
 
-### Frontend
-- Built with React and TypeScript
-- State management using Zustand
-- Modern UI components with shadcn/ui
-- Responsive design with Tailwind CSS
-- Form handling with React Hook Form and Zod validation
+## State Management
 
-### Key Components
-1. **Calculator**
-   - Main component orchestrating all sections
-   - Tab-based navigation
-   - Dynamic section rendering
-
-2. **ItemsTable**
-   - Reusable component for all item sections
-   - Quantity controls with plus/minus buttons
-   - Real-time total calculations
-   - Clean, intuitive interface
-
-3. **SettlementSection**
-   - Date-based calculations
-   - Year-by-year breakdown
-   - Automatic updates based on term and escalation
-
-4. **AddItemDialog**
-   - Modal for adding new items
-   - Form validation
-   - Unique ID generation
-   - Section-specific item addition
-
-### Calculations
-- Hardware costs include:
-  - Base item costs
-  - Distance-based charges
-  - Extension costs
-  - Sliding scale installation costs
-
-- Settlement calculations consider:
-  - Start date
-  - Current date
-  - Term length
-  - Escalation rate
-  - Rental type
-
-- Finance fee determination based on total amount:
-  - R0 - R20,000: R1,500
-  - R20,001 - R50,000: R2,500
-  - R50,001+: R3,500
-
-## Getting Started
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-## Dependencies
-- React
-- TypeScript
-- Tailwind CSS
-- Zustand
-- shadcn/ui
-- React Hook Form
-- Zod
-- Lucide React (for icons)
-
-## Project Structure
+### Calculator Store (`calculator.ts`)
+```typescript
+interface CalculatorStore {
+  sections: Section[];
+  dealDetails: DealDetails;
+  baseGrossProfit: { [key: string]: number };
+  financeScales: { [key: string]: number };
+  installationScales: { [key: string]: number };
+  factorScales: { [key: string]: { [key: string]: number } };
+  additionalCosts: {
+    cost_per_kilometer: number;
+    cost_per_point: number;
+  };
+  // ... store methods
+}
 ```
-src/
-├── components/
-│   ├── sections/
-│   │   ├── HardwareSection.tsx
-│   │   ├── ConnectivitySection.tsx
-│   │   ├── LicensingSection.tsx
-│   │   ├── DealDetailsSection.tsx
-│   │   ├── SettlementSection.tsx
-│   │   └── TotalCostsSection.tsx
-│   ├── tables/
-│   │   └── ItemsTable.tsx
-│   ├── dialogs/
-│   │   └── AddItemDialog.tsx
-│   └── ui/
-├── store/
-│   └── calculator.ts
-├── lib/
-│   └── utils.ts
-└── types/
-    └── calculator.ts
+
+### Configuration (`config.json`)
+```json
+{
+  "scales": {
+    "installation": {
+      "0-4": 3500,
+      "5-8": 3500,
+      "9-16": 7000,
+      "17-32": 10500,
+      "33+": 15000
+    },
+    "finance_fee": {
+      "0-20000": 1000,
+      "20001-50000": 1000,
+      "50001-100000": 2000,
+      "100001+": 3000
+    },
+    "gross_profit": {
+      "0-4": 15000,
+      "5-8": 20000,
+      "9-16": 25000,
+      "17-32": 30000,
+      "33+": 35000
+    },
+    "additional_costs": {
+      "cost_per_kilometer": 15,
+      "cost_per_point": 250
+    }
+  }
+}
 ```
 
-## Recent Updates
-1. Added secure admin panel with authentication
-   - Protected routes for managing items, factors, and scales
-   - JWT-based authentication
-   - Role-based access control
-2. Improved CORS configuration for production deployment
-   - Support for multiple Netlify domains
-   - Secure header handling
-3. Enhanced API security
-   - Protected admin routes with authentication
-   - Proper token validation
-4. Fixed deployment issues
-   - Resolved authentication in production
-   - Corrected store initialization with auth headers
-5. Previous Updates:
-   - Fixed quantity adjustment functionality
-   - Corrected settlement calculations
-   - Implemented add item functionality
-   - Updated UI for better visibility
-   - Streamlined quantity controls
+## Backend API Structure
 
-## Deployment
+### Authentication Endpoints
+```typescript
+interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    username: string;
+    role: 'admin' | 'user';
+  };
+}
+
+POST /api/admin/login
+Body: { username: string, password: string }
+Response: AuthResponse
+
+GET /api/admin/verify
+Headers: { Authorization: `Bearer ${token}` }
+Response: { valid: boolean }
+```
+
+### Admin Endpoints
+```typescript
+POST /api/admin/items
+Headers: { Authorization: `Bearer ${token}` }
+Body: { sectionId: string, items: Item[] }
+
+GET /api/admin/scales
+Headers: { Authorization: `Bearer ${token}` }
+Response: { scales: Scales }
+
+POST /api/admin/scales
+Headers: { Authorization: `Bearer ${token}` }
+Body: { scales: Scales }
+```
+
+## Common Issues and Solutions
+
+### 1. Authentication Issues
+- **Symptom**: Admin login fails
+- **Solution**: 
+  ```typescript
+  // 1. Clear localStorage
+  localStorage.clear();
+  // 2. Check token in localStorage
+  const token = localStorage.getItem('adminToken');
+  // 3. Verify token is valid
+  const response = await fetch(`${API_URL}/api/admin/verify`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  ```
+
+### 2. Calculation Errors
+- **Symptom**: Incorrect totals
+- **Solution**: 
+  1. Verify scales in `config.json`
+  2. Check `calculateTotalCosts()` in calculator store
+  3. Validate all quantity inputs are numbers
+  4. Ensure proper escalation rate is applied
+
+### 3. PDF Generation Fails
+- **Symptom**: PDF doesn't generate
+- **Solution**:
+  1. Check all required fields are filled
+  2. Verify customer name is set
+  3. Ensure all calculations completed
+  4. Check console for jsPDF errors
+
+## Development Environment Setup
+
+### Prerequisites
+```bash
+node -v  # v16.x or higher
+npm -v   # v8.x or higher
+```
+
+### Installation
+```bash
+git clone <repository-url>
+cd deal-cost-calculator
+npm install
+```
+
+### Environment Variables
+```bash
+# .env.development
+VITE_API_URL=http://localhost:5000
+
+# .env.production
+VITE_API_URL=https://your-production-api.com
+```
+
+## Production Deployment
 
 ### Frontend (Netlify)
+```bash
+# Build command
+npm run build
 
-1. Connect your GitHub repository to Netlify
-2. Configure build settings:
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-3. Set environment variables:
-   - Go to Site settings > Build & deploy > Environment variables
-   - Add `VITE_API_URL` pointing to your backend URL (e.g., `https://your-app-name.onrender.com`)
+# Environment variables
+VITE_API_URL=https://your-backend-url.com
+```
 
 ### Backend (Render)
+```bash
+# Build command
+pip install -r requirements.txt
 
-1. Connect your GitHub repository to Render
-2. Create a new Web Service
-3. Configure build settings:
-   - Build command: `pip install -r requirements.txt`
-   - Start command: `python app.py`
-4. Set environment variables:
-   - `FLASK_ENV=production`
-   - `SECRET_KEY=your-secret-key`
+# Start command
+python app.py
 
-## Troubleshooting
+# Environment variables
+FLASK_ENV=production
+SECRET_KEY=your-secret-key
+```
 
-### Common Issues
+## File Structure
+```
+/
+├── src/
+│   ├── components/
+│   │   ├── sections/
+│   │   │   ├── DealDetailsSection.tsx
+│   │   │   ├── HardwareSection.tsx
+│   │   │   ├── ConnectivitySection.tsx
+│   │   │   ├── LicensingSection.tsx
+│   │   │   ├── SettlementSection.tsx
+│   │   │   └── TotalCostsSection.tsx
+│   │   ├── tables/
+│   │   │   └── ItemsTable.tsx
+│   │   ├── admin/
+│   │   │   ├── AdditionalCostsTab.tsx
+│   │   │   └── AdminLoginButton.tsx
+│   │   └── GeneratePDFButton.tsx
+│   ├── store/
+│   │   ├── calculator.ts
+│   │   └── auth.ts
+│   ├── types/
+│   │   └── calculator.ts
+│   └── config.ts
+├── backend/
+│   ├── app.py
+│   └── config.json
+└── public/
+```
 
-1. **Missing Headers/Sections**
-   - Clear browser cache and localStorage
-   - Verify `VITE_API_URL` is set correctly in Netlify
-   - Check browser console for API errors
-
-2. **Admin Login Issues**
-   - Ensure backend URL is correct
-   - Clear browser cache and localStorage
-   - Check CORS configuration on backend
-   - Verify credentials are correct
-
-3. **CORS Errors**
-   - Verify backend CORS configuration includes Netlify domain
-   - Check for trailing slashes in API URLs
-   - Ensure proper headers are being sent
-
-### Development Setup
-
-1. Clone the repository
-2. Copy `.env.example` to `.env`
-3. Update environment variables as needed
-4. Install dependencies: `npm install`
-5. Start development server: `npm run dev`
-
-## Deployment
-
-The application is deployed and accessible at:
+## Dependencies
 
 ### Frontend
-- Production: https://deal-cost-calculator.netlify.app
-- Hosting: Netlify
-- Auto-deploys from the main branch
+```json
+{
+  "dependencies": {
+    "@radix-ui/react-tabs": "^1.0.0",
+    "jspdf": "^2.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.0",
+    "tailwindcss": "^3.2.4",
+    "zustand": "^4.3.2"
+  }
+}
+```
 
 ### Backend
-- Production: https://deal-cost-calculator.onrender.com
-- Hosting: Render
-- Auto-deploys from the main branch
+```python
+# requirements.txt
+flask==2.0.1
+flask-cors==3.0.10
+python-dotenv==0.19.0
+pyjwt==2.3.0
+```
 
-### Environment Setup
-1. Frontend (.env.production):
-   ```
-   VITE_API_URL=https://deal-cost-calculator.onrender.com
-   ```
+## Version Control
+```bash
+# Create a new feature branch
+git checkout -b feature/new-feature
 
-2. Backend (.env):
-   ```
-   SECRET_KEY=your-secret-key
-   FLASK_ENV=production
-   ```
+# Commit changes
+git add .
+git commit -m "Description of changes"
 
-## Contributing
-Feel free to submit issues and enhancement requests.
+# Push changes
+git push origin feature/new-feature

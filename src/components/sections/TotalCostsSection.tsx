@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/lib/utils";
 import { useCalculatorStore } from "@/store/calculator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GenerateProposalButton from "../GenerateProposalButton";
 
 export function TotalCostsSection() {
   const { calculateTotalCosts } = useCalculatorStore();
@@ -330,6 +331,9 @@ export function TotalCostsSection() {
           </div>
         </CardContent>
       </Card>
+      <div className="flex justify-end space-x-4">
+        <GenerateProposalButton />
+      </div>
     </div>
   );
 }
