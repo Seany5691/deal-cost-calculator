@@ -18,10 +18,27 @@ interface DealDetails {
   settlement: number;
 }
 
+const formatCurrency = (amount: number) => {
+  return `R ${amount.toFixed(2)}`;
+};
+
 const formatHardwareItems = (items: Item[]) => {
+  const nameMap: Record<string, string> = {
+    'Yealink T31P (B&W desk- excludes PSU)': 'Yealink T31P Desk Phone',
+    'Yealink T34W (Colour desk- includes PSU)': 'Yealink T34W Desk Phone',
+    'Yealink T43U Switchboard (B&W- excludes PSU)': 'Yealink T43U Switchboard',
+    'Yealink T44U Switchboard (Colour- excludes PSU)': 'Yealink T44U Switchboard',
+    'Yealink W73P Cordless (Handset & base)': 'Yealink W73P Cordless + Base',
+    'Yealink W73H (Handset only)': 'Yealink W73H Cordless',
+    'Additional Mobile App': 'Additional Apps'
+  };
+
   return items
     .filter(item => item.quantity > 0)
-    .map(item => `${item.quantity} x ${item.name}`)
+    .map(item => {
+      const shortName = nameMap[item.name] || item.name;
+      return `${item.quantity} x ${shortName}`;
+    })
     .join(', ');
 };
 
@@ -76,15 +93,20 @@ async function fillAndDownloadProposal(clientName: string, email: string) {
     form.getTextField('Hardware Term 2').setText(`${store.dealDetails.term} Months`);
     form.getTextField('MRC 1').setText(formatConnectivityItems(connectivityItems));
     form.getTextField('License 1').setText(formatLicensingItems(licensingItems));
-    form.getTextField('Total Hardware').setText(totalCosts.hardwareRental.toFixed(2));
+    form.getTextField('Total Hardware').setText(formatCurrency(totalCosts.hardwareRental));
     form.getTextField('Total Hardware Term').setText(`${store.dealDetails.term} Months`);
-    form.getTextField('Total MRC').setText(totalCosts.totalMRC.toFixed(2));
+    form.getTextField('Total MRC').setText(formatCurrency(totalCosts.totalMRC));
     form.getTextField('Total MRC Term').setText(`${store.dealDetails.term} Months`);
-    form.getTextField('Grand Total').setText(totalCosts.totalExVat.toFixed(2));
+    form.getTextField('Grand Total').setText(formatCurrency(totalCosts.totalExVat));
     form.getTextField('Client Name').setText(clientName);
     form.getTextField('Solution Summary').setText(getSolutionSummary(hardwareItems, store.dealDetails));
     form.getTextField('Email').setText(email);
-
+    
+    // New field mappings
+    form.getTextField('MRC Price 1').setText(formatCurrency(totalCosts.connectivityCost));
+    form.getTextField('MRC Price 3').setText(formatCurrency(totalCosts.licensingCost));
+    form.getTextField('MRC Term 1').setText(`${store.dealDetails.term} Months`);
+    form.getTextField('MRC Term 3').setText(`${store.dealDetails.term} Months`);
     // Save and download PDF
     const pdfBytes = await pdfDoc.save();
     downloadPDF(pdfBytes, `${store.dealDetails.customerName} Proposal.pdf`);
