@@ -11,7 +11,15 @@ export function AdditionalCostsTab() {
 
   // Fetch initial values
   React.useEffect(() => {
-    fetch(`${API_URL}/api/admin/scales`)
+    const token = localStorage.getItem('adminToken');
+    if (!token) return;
+
+    fetch(`${API_URL}/api/admin/scales`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    })
       .then((response) => response.json())
       .then((data) => {
         if (data.additional_costs) {
@@ -31,8 +39,16 @@ export function AdditionalCostsTab() {
 
   const handleSave = async () => {
     try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('No authentication token');
+      }
+
       const response = await fetch(`${API_URL}/api/admin/scales`, {
-        method: 'GET'
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
       });
       const currentScales = await response.json();
 
@@ -48,7 +64,9 @@ export function AdditionalCostsTab() {
       const saveResponse = await fetch(`${API_URL}/api/admin/scales`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(updatedScales),
       });
