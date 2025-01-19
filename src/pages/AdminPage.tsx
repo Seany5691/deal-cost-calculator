@@ -5,6 +5,7 @@ import { ItemsTab } from '@/components/admin/ItemsTab';
 import { FactorSheetTab } from '@/components/admin/FactorSheetTab';
 import { ScalesTab } from '@/components/admin/ScalesTab';
 import { UsersTab } from '@/components/admin/UsersTab';
+import { AdditionalCostsTab } from '@/components/admin/AdditionalCostsTab';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -122,6 +123,11 @@ export function AdminPage() {
       value: 'scales',
       label: 'Scales',
       content: <ScalesTab />
+    },
+    {
+      value: 'additional-costs',
+      label: 'Additional Costs',
+      content: <AdditionalCostsTab />
     },
     {
       value: 'users',

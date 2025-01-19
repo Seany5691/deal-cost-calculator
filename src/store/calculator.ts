@@ -31,11 +31,16 @@ interface CalculatorStore {
   financeScales: { [key: string]: number };
   installationScales: { [key: string]: number };
   factorScales: { [key: string]: { [key: string]: number } };
+  additionalCosts: {
+    cost_per_kilometer: number;
+    cost_per_point: number;
+  };
   setSections: (sections: Section[]) => void;
   setBaseGrossProfit: (profit: { [key: string]: number }) => void;
   setFinanceScales: (scales: { [key: string]: number }) => void;
   setInstallationScales: (scales: { [key: string]: number }) => void;
   setFactorScales: (scales: { [key: string]: { [key: string]: number } }) => void;
+  setAdditionalCosts: (costs: { cost_per_kilometer: number; cost_per_point: number }) => void;
   addSessionItem: (sectionId: string, name: string, cost: number) => void;
   updateQuantity: (sectionId: string, itemId: string, quantity: number) => void;
   updateDealDetails: (details: Partial<DealDetails>) => void;
@@ -116,11 +121,16 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
   financeScales: {},
   installationScales: {},
   factorScales: {},
+  additionalCosts: {
+    cost_per_kilometer: 15,
+    cost_per_point: 250
+  },
   setSections: (sections) => set({ sections }),
   setBaseGrossProfit: (profit) => set({ baseGrossProfit: profit }),
   setFinanceScales: (scales) => set({ financeScales: scales }),
   setInstallationScales: (scales) => set({ installationScales: scales }),
   setFactorScales: (scales) => set({ factorScales: scales }),
+  setAdditionalCosts: (costs) => set({ additionalCosts: costs }),
   addSessionItem: (sectionId, name, cost) => {
     const state = get();
     const sections = state.sections.map(section => {
@@ -197,12 +207,12 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
 
   calculateTotalCosts: () => {
     const state = get();
-    const { sections, dealDetails, financeScales, baseGrossProfit, installationScales, factorScales } = state;
+    const { sections, dealDetails, financeScales, baseGrossProfit, installationScales, factorScales, additionalCosts } = state;
 
     // Calculate number of extensions
     const hardwareSection = sections.find(s => s.id === 'hardware');
     const extensions = hardwareSection?.items.reduce((sum, item) => {
-      if (['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app', 'yealink-t54w', 'yealink-t53w', 'yealink-t52w', 'yealink-t46s', 'yealink-t48s', 'yealink-t49g', 'yealink-t55a', 'yealink-t57w', 'yealink-t58a', 'yealink-t56a', 'yealink-t54s', 'yealink-t53s', 'yealink-t52s', 'yealink-t46g', 'yealink-t48g', 'yealink-t49s'].includes(item.id)) {
+      if (['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app'].includes(item.id)) {
         return sum + (Number(item.quantity) || 0);
       }
       return sum;
@@ -212,9 +222,9 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
     const hardwareTotal = hardwareSection?.items.reduce((sum, item) => 
       sum + (Number(item.cost) || 0) * (Number(item.quantity) || 0), 0) || 0;
 
-    // Calculate installation costs
-    const distanceCost = (Number(dealDetails.distanceToInstall) || 0) * 15;
-    const extensionsCost = extensions * 250;
+    // Calculate installation costs using configurable values
+    const distanceCost = (Number(dealDetails.distanceToInstall) || 0) * additionalCosts.cost_per_kilometer;
+    const extensionsCost = extensions * additionalCosts.cost_per_point;
     
     // Calculate sliding scale cost for installation based on extensions
     let slidingScaleCost = 0;
@@ -405,150 +415,59 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
   initializeStore: async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const headers: HeadersInit = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      if (!token) {
+        throw new Error('No authentication token');
       }
 
-      console.log('Using API URL:', API_URL);
-
-      // Fetch sections with better error handling
+      // Fetch sections
       const sectionsResponse = await fetch(`${API_URL}/api/admin/items`, {
-        method: 'GET',
-        headers,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        },
         mode: 'cors',
-        credentials: 'omit',
-        cache: 'no-cache'
+        credentials: 'omit'
       });
-      
-      let sections = DEFAULT_SECTIONS;
-      
-      if (sectionsResponse.ok) {
-        const fetchedSections = await sectionsResponse.json();
-        console.log('Fetched sections:', fetchedSections);
-        
-        if (Array.isArray(fetchedSections) && fetchedSections.length > 0) {
-          sections = fetchedSections.map((section: Section) => ({
-            ...section,
-            items: section.items.map((item: Item) => ({
-              ...item,
-              locked: section.id === 'hardware' && ['yealink-t31p', 'yealink-t34w', 'yealink-t43u', 'yealink-t44u', 'yealink-w73p', 'yealink-w73h', 'mobile-app', 'yealink-t54w', 'yealink-t53w', 'yealink-t52w', 'yealink-t46s', 'yealink-t48s', 'yealink-t49g', 'yealink-t55a', 'yealink-t57w', 'yealink-t58a', 'yealink-t56a', 'yealink-t54s', 'yealink-t53s', 'yealink-t52s', 'yealink-t46g', 'yealink-t48g', 'yealink-t49s'].includes(item.id)
-            }))
-          }));
-        }
-      } else {
-        console.error('Failed to fetch items:', {
-          status: sectionsResponse.status,
-          statusText: sectionsResponse.statusText
-        });
-        const errorText = await sectionsResponse.text();
-        console.error('Error details:', errorText);
+
+      if (!sectionsResponse.ok) {
+        throw new Error('Failed to fetch sections');
       }
 
-      // Fetch scales with better error handling
+      const sectionsData = await sectionsResponse.json();
+      set({ sections: sectionsData.sections || [] });
+
+      // Fetch all scales in parallel
       const [scalesResponse, factorsResponse] = await Promise.all([
         fetch(`${API_URL}/api/admin/scales`, {
-          method: 'GET',
-          headers,
-          mode: 'cors',
-          credentials: 'omit',
-          cache: 'no-cache'
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
         }),
         fetch(`${API_URL}/api/admin/factors`, {
-          method: 'GET',
-          headers,
-          mode: 'cors',
-          credentials: 'omit',
-          cache: 'no-cache'
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
         })
       ]);
-      
-      let scales = {
-        gross_profit: {},
-        finance_fee: {},
-        installation: {},
-      };
 
-      let factors = {};
-      
-      if (scalesResponse.ok) {
-        const fetchedScales = await scalesResponse.json();
-        console.log('Fetched scales:', fetchedScales);
-        
-        if (fetchedScales) {
-          scales = {
-            gross_profit: fetchedScales.gross_profit || scales.gross_profit,
-            finance_fee: fetchedScales.finance_fee || scales.finance_fee,
-            installation: fetchedScales.installation || scales.installation,
-          };
+      if (!scalesResponse.ok || !factorsResponse.ok) {
+        throw new Error('Failed to fetch scales or factors');
+      }
 
-          // Validate required scales
-          if (!scales.gross_profit || !scales.finance_fee || !scales.installation) {
-            console.error('Missing required scales:', {
-              gross_profit: scales.gross_profit,
-              finance_fee: scales.finance_fee,
-              installation: scales.installation,
-            });
-            throw new Error('Missing required scales');
-          }
+      const scalesData = await scalesResponse.json();
+      const factorsData = await factorsResponse.json();
+
+      set({
+        baseGrossProfit: scalesData.gross_profit || {},
+        financeScales: scalesData.finance_fee || {},
+        installationScales: scalesData.installation || {},
+        factorScales: factorsData || {},
+        additionalCosts: scalesData.additional_costs || {
+          cost_per_kilometer: 15,
+          cost_per_point: 250
         }
-      } else {
-        console.error('Failed to fetch scales:', {
-          status: scalesResponse.status,
-          statusText: scalesResponse.statusText
-        });
-        const errorText = await scalesResponse.text();
-        console.error('Error details:', errorText);
-      }
-
-      if (factorsResponse.ok) {
-        const rawFactors = await factorsResponse.json();
-        console.log('Fetched raw factors:', rawFactors);
-        
-        // Convert factors to the correct format
-        const convertedFactors: { [key: string]: { [key: string]: number } } = {};
-        Object.entries(rawFactors as Record<string, Record<string, Record<string, number>>>).forEach(([term, escalationObj]) => {
-          Object.entries(escalationObj).forEach(([escalation, rangeObj]) => {
-            const termValue = term.split('_')[0];  // "36_months" -> "36"
-            const escalationValue = escalation.replace('%', ''); // "0%" -> "0"
-            const key = `${termValue}-${escalationValue}`;
-            
-            convertedFactors[key] = {};
-            Object.entries(rangeObj).forEach(([range, factor]) => {
-              if (range === '100000+') {
-                convertedFactors[key]['100001-Infinity'] = factor;
-              } else {
-                convertedFactors[key][range] = factor;
-              }
-            });
-          });
-        });
-        
-        factors = convertedFactors;
-        console.log('Converted factors:', factors);
-      } else {
-        console.error('Failed to fetch factors:', {
-          status: factorsResponse.status,
-          statusText: factorsResponse.statusText
-        });
-        const errorText = await factorsResponse.text();
-        console.error('Error details:', errorText);
-      }
-      
-      console.log('Using sections:', sections);
-      console.log('Using scales:', scales);
-      console.log('Using factors:', factors);
-      
-      set({ 
-        sections,
-        baseGrossProfit: scales.gross_profit || {},
-        financeScales: scales.finance_fee || {},
-        installationScales: scales.installation || {},
-        factorScales: factors || {}
       });
     } catch (error) {
       console.error('Store initialization failed:', error);
@@ -557,7 +476,11 @@ export const useCalculatorStore = create<CalculatorStore>((set, get) => ({
         baseGrossProfit: {},
         financeScales: {},
         installationScales: {},
-        factorScales: {}
+        factorScales: {},
+        additionalCosts: {
+          cost_per_kilometer: 15,
+          cost_per_point: 250
+        }
       });
     }
   },

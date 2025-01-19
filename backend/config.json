@@ -261,6 +261,10 @@
       "9-16": 25000,
       "17-32": 30000,
       "33+": 35000
+    },
+    "additional_costs": {
+      "cost_per_kilometer": 15,
+      "cost_per_point": 250
     }
   }
 }
